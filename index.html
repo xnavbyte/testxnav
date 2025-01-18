@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Остатки товаров</title>
     <style>
-        /* CSS стили */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -110,13 +109,13 @@
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const apiUrl = './data.json'; // Относительный путь к JSON-файлу
+            const apiUrl = 'http://185.190.182.73:5000/api/products'; // Укажите URL API
             const tableBody = document.getElementById('tableBody');
             const searchInput = document.getElementById('searchInput');
 
             let data = [];
 
-            // Функция загрузки данных из JSON
+            // Получение данных с сервера
             async function fetchData() {
                 try {
                     const response = await fetch(apiUrl);
@@ -127,7 +126,7 @@
                 }
             }
 
-            // Функция рендера таблицы
+            // Рендер таблицы
             function renderTable(data) {
                 tableBody.innerHTML = '';
                 if (data.length > 0) {
@@ -150,14 +149,14 @@
                 }
             }
 
-            // Функция поиска
+            // Обработчик поиска
             searchInput.addEventListener('input', () => {
                 const query = searchInput.value.toLowerCase();
                 const filteredData = data.filter(item => item.название.toLowerCase().includes(query));
                 renderTable(filteredData);
             });
 
-            // Загрузка данных при загрузке страницы
+            // Загружаем данные при загрузке страницы
             fetchData();
         });
     </script>
