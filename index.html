@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Остатки товаров</title>
     <style>
+        /* CSS стили */
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
@@ -83,19 +84,6 @@
         .table th {
             font-weight: bold;
         }
-        button {
-            margin: 20px 0;
-            padding: 10px 20px;
-            font-size: 1rem;
-            background-color: #0073e6;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #005bb5;
-        }
     </style>
 </head>
 <body>
@@ -118,48 +106,60 @@
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
-            <button id="sendDataBtn">Обновить данные</button>
         </main>
     </div>
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const apiUrl = './data.json'; // Относительный путь к файлу JSON
-    const tableBody = document.getElementById('tableBody');
-    const searchInput = document.getElementById('searchInput');
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiUrl = './data.json'; // Относительный путь к JSON-файлу
+            const tableBody = document.getElementById('tableBody');
+            const searchInput = document.getElementById('searchInput');
 
-    let data = [];
+            let data = [];
 
-    async function fetchData() {
-        try {
-            const response = await fetch(apiUrl);
-            data = await response.json();
-            renderTable(data);
-        } catch (error) {
-            console.error('Ошибка загрузки данных:', error);
-        }
-    }
+            // Функция загрузки данных из JSON
+            async function fetchData() {
+                try {
+                    const response = await fetch(apiUrl);
+                    data = await response.json();
+                    renderTable(data);
+                } catch (error) {
+                    console.error('Ошибка загрузки данных:', error);
+                }
+            }
 
-    function renderTable(data) {
-        tableBody.innerHTML = '';
-        data.forEach(row => {
-            const tr = document.createElement('tr');
-            ["название", "производитель", "остаток", "цена"].forEach(key => {
-                const td = document.createElement('td');
-                td.textContent = key === "цена" ? `${row[key]} ₽` : row[key];
-                tr.appendChild(td);
+            // Функция рендера таблицы
+            function renderTable(data) {
+                tableBody.innerHTML = '';
+                if (data.length > 0) {
+                    data.forEach(row => {
+                        const tr = document.createElement('tr');
+                        ["название", "производитель", "остаток", "цена"].forEach(key => {
+                            const td = document.createElement('td');
+                            td.textContent = key === "цена" ? `${row[key]} ₽` : row[key];
+                            tr.appendChild(td);
+                        });
+                        tableBody.appendChild(tr);
+                    });
+                } else {
+                    const noDataRow = document.createElement('tr');
+                    const noDataCell = document.createElement('td');
+                    noDataCell.colSpan = 4;
+                    noDataCell.textContent = 'Нет данных для отображения';
+                    noDataRow.appendChild(noDataCell);
+                    tableBody.appendChild(noDataRow);
+                }
+            }
+
+            // Функция поиска
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                const filteredData = data.filter(item => item.название.toLowerCase().includes(query));
+                renderTable(filteredData);
             });
-            tableBody.appendChild(tr);
+
+            // Загрузка данных при загрузке страницы
+            fetchData();
         });
-    }
-
-    searchInput.addEventListener('input', () => {
-        const query = searchInput.value.toLowerCase();
-        const filteredData = data.filter(item => item.название.toLowerCase().includes(query));
-        renderTable(filteredData);
-    });
-
-    fetchData();
-});
-</script>
+    </script>
 </body>
 </html>
