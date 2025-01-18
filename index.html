@@ -83,6 +83,19 @@
         .table th {
             font-weight: bold;
         }
+        button {
+            margin: 20px 0;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #0073e6;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005bb5;
+        }
     </style>
 </head>
 <body>
@@ -105,19 +118,20 @@
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
-            <button id="uploadDataBtn">Отправить новые остатки</button>
+            <button id="sendDataBtn">Обновить данные</button>
         </main>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('searchInput');
+            const apiEndpoint = "https://example.com/api/products"; // Подмените на ваш API
             const tableBody = document.getElementById('tableBody');
-            const uploadDataBtn = document.getElementById('uploadDataBtn');
+            const searchInput = document.getElementById('searchInput');
+            const sendDataBtn = document.getElementById('sendDataBtn');
 
-            // Загружаем данные из LocalStorage
+            // Хранилище данных в памяти
             let data = JSON.parse(localStorage.getItem('productData')) || [];
 
-            // Функция рендеринга таблицы
+            // Функция рендера таблицы
             function renderTable(data) {
                 tableBody.innerHTML = '';
 
@@ -141,31 +155,42 @@
                 }
             }
 
-            // Функция для добавления новых данных (симуляция "отправки остатков")
-            function uploadData() {
-                // Пример новых данных
-                const newData = [
-                    { название: "Товар 1", производитель: "Производитель 1", остаток: 10, цена: 100 },
-                    { название: "Товар 2", производитель: "Производитель 2", остаток: 5, цена: 200 },
-                    { название: "Товар 3", производитель: "Производитель 3", остаток: 7, цена: 150 }
-                ];
-                data = newData; // Заменяем текущие данные
-                localStorage.setItem('productData', JSON.stringify(data)); // Сохраняем в LocalStorage
-                renderTable(data); // Обновляем таблицу
-                alert('Остатки обновлены!');
+            // Функция обновления данных через API
+            async function updateData() {
+                try {
+                    const response = await fetch(apiEndpoint, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ message: "Обновите товары" }) // Пример
+                    });
+                    if (response.ok) {
+                        const newData = await response.json();
+                        data = newData;
+                        localStorage.setItem('productData', JSON.stringify(data)); // Сохранить данные
+                        renderTable(data);
+                        alert("Данные успешно обновлены!");
+                    } else {
+                        alert("Ошибка обновления данных.");
+                    }
+                } catch (error) {
+                    console.error("Ошибка:", error);
+                    alert("Не удалось обновить данные.");
+                }
             }
 
-            // Обработчик кнопки "Отправить новые остатки"
-            uploadDataBtn.addEventListener('click', uploadData);
-
-            // Обработчик поиска
+            // Поиск по таблице
             searchInput.addEventListener('input', () => {
                 const query = searchInput.value.toLowerCase();
                 const filteredData = data.filter(item => item.название.toLowerCase().includes(query));
                 renderTable(filteredData);
             });
 
-            // Рендерим таблицу при загрузке
+            // Кнопка обновления данных
+            sendDataBtn.addEventListener('click', updateData);
+
+            // Рендеринг таблицы при загрузке
             renderTable(data);
         });
     </script>
