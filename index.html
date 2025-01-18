@@ -122,77 +122,44 @@
         </main>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const apiEndpoint = "https://example.com/api/products"; // Подмените на ваш API
-            const tableBody = document.getElementById('tableBody');
-            const searchInput = document.getElementById('searchInput');
-            const sendDataBtn = document.getElementById('sendDataBtn');
+document.addEventListener('DOMContentLoaded', () => {
+    const apiUrl = './data.json'; // Относительный путь к файлу JSON
+    const tableBody = document.getElementById('tableBody');
+    const searchInput = document.getElementById('searchInput');
 
-            // Хранилище данных в памяти
-            let data = JSON.parse(localStorage.getItem('productData')) || [];
+    let data = [];
 
-            // Функция рендера таблицы
-            function renderTable(data) {
-                tableBody.innerHTML = '';
-
-                if (data.length > 0) {
-                    data.forEach(row => {
-                        const tr = document.createElement('tr');
-                        ["название", "производитель", "остаток", "цена"].forEach(key => {
-                            const td = document.createElement('td');
-                            td.textContent = key === "цена" ? `${row[key]} ₽` : row[key];
-                            tr.appendChild(td);
-                        });
-                        tableBody.appendChild(tr);
-                    });
-                } else {
-                    const noDataRow = document.createElement('tr');
-                    const noDataCell = document.createElement('td');
-                    noDataCell.colSpan = 4;
-                    noDataCell.textContent = 'Нет данных для отображения';
-                    noDataRow.appendChild(noDataCell);
-                    tableBody.appendChild(noDataRow);
-                }
-            }
-
-            // Функция обновления данных через API
-            async function updateData() {
-                try {
-                    const response = await fetch(apiEndpoint, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ message: "Обновите товары" }) // Пример
-                    });
-                    if (response.ok) {
-                        const newData = await response.json();
-                        data = newData;
-                        localStorage.setItem('productData', JSON.stringify(data)); // Сохранить данные
-                        renderTable(data);
-                        alert("Данные успешно обновлены!");
-                    } else {
-                        alert("Ошибка обновления данных.");
-                    }
-                } catch (error) {
-                    console.error("Ошибка:", error);
-                    alert("Не удалось обновить данные.");
-                }
-            }
-
-            // Поиск по таблице
-            searchInput.addEventListener('input', () => {
-                const query = searchInput.value.toLowerCase();
-                const filteredData = data.filter(item => item.название.toLowerCase().includes(query));
-                renderTable(filteredData);
-            });
-
-            // Кнопка обновления данных
-            sendDataBtn.addEventListener('click', updateData);
-
-            // Рендеринг таблицы при загрузке
+    async function fetchData() {
+        try {
+            const response = await fetch(apiUrl);
+            data = await response.json();
             renderTable(data);
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+        }
+    }
+
+    function renderTable(data) {
+        tableBody.innerHTML = '';
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            ["название", "производитель", "остаток", "цена"].forEach(key => {
+                const td = document.createElement('td');
+                td.textContent = key === "цена" ? `${row[key]} ₽` : row[key];
+                tr.appendChild(td);
+            });
+            tableBody.appendChild(tr);
         });
-    </script>
+    }
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.toLowerCase();
+        const filteredData = data.filter(item => item.название.toLowerCase().includes(query));
+        renderTable(filteredData);
+    });
+
+    fetchData();
+});
+</script>
 </body>
 </html>
